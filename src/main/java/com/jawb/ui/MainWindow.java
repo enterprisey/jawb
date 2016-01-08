@@ -27,15 +27,16 @@ public class MainWindow {
     private static final double MAIN_SPLIT = 0.5;
     private static final double BOTTOM_SPLIT = 0.455;
 
+    public static final String DEFAULT_TITLE = "JAutoWikiBrowser " +
+            PropertiesManager.getInstance().getProperty( "application.version" );
+
     public MainWindow( Controller controller, DefaultListModel<String> listModel ) {
         this.controller = controller;
         this.listModel = listModel;
     }
 
     private void buildGui() {
-        PropertiesManager props = PropertiesManager.getInstance();
-        frame = new JFrame( "JAutoWikiBrowser " +
-                            props.getProperty( "application.version" ) );
+        frame = new JFrame( DEFAULT_TITLE );
         JPanel mainPanel = new JPanel( new BorderLayout() );
         mainPanel.setBorder( BorderFactory.createEmptyBorder( 2, 2, 2, 2 ) );
         JPanel bottomLeftPanel = new JPanel( new BorderLayout() );
@@ -80,6 +81,13 @@ public class MainWindow {
             mainSplitPane.setDividerLocation( MAIN_SPLIT );
             southSplitPane.setDividerLocation( BOTTOM_SPLIT );
         }
+    }
+
+    public void setTitle( String title ) {
+        if( title.equals( "" ) ) {
+            title = DEFAULT_TITLE;
+        }
+        frame.setTitle( title );
     }
 
     public JFrame getFrame() {

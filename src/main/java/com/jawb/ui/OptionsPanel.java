@@ -14,7 +14,7 @@ public class OptionsPanel extends JPanel {
     private JCheckBox lock;
     private JCheckBox minorEdit;
 
-    Controller controller;
+    private Controller controller;
 
     public OptionsPanel( Controller controller ) {
         super( new BorderLayout() );
@@ -77,7 +77,9 @@ public class OptionsPanel extends JPanel {
         rightSaveOptions.add( rightSaveOptions2 );
         rightSaveOptions.add( Box.createVerticalStrut( 10 ) );
         JPanel rightSaveOptions3 = new JPanel( new GridLayout( 2, 1, 0, 10 ) );
-        rightSaveOptions3.add( new JButton( "Skip" ) );
+        JButton skipButton = new JButton( "Skip" );
+        skipButton.addActionListener( event -> new Thread( controller::handleSkip ).start() );
+        rightSaveOptions3.add( skipButton );
         JButton saveButton = new JButton( "Save" );
         saveButton.addActionListener( event -> new Thread( controller::handleSave ).start() );
         rightSaveOptions3.add( saveButton );

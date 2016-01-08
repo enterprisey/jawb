@@ -18,6 +18,7 @@ public class Controller {
     private AccountModel accountModel;
     private DefaultListModel<String> listModel;
     private EditorModel editorModel;
+    private StatisticsModel statisticsModel;
 
     public static void main( String[] args ) {
         ( new Controller() ).go();
@@ -28,6 +29,7 @@ public class Controller {
         accountModel = new AccountModel();
         listModel = new DefaultListModel<>();
         editorModel = new EditorModel();
+        statisticsModel = new StatisticsModel();
 
         mainWindow = new MainWindow( this, listModel );
         loginDialog = new LoginDialog( mainWindow.getFrame() );
@@ -55,11 +57,10 @@ public class Controller {
             }
             ( new Thread( () -> {
                 try {
-                    mainWindow.getStatusBar().setProgressBarIndeterminate( true );
-                    mainWindow.getFrame().repaint();
+                    SwingUtilities.invokeLater( () -> mainWindow.getStatusBar().setProgressBarIndeterminate( true ) );
                     accountModel.login( credentials, mainWindow.getStatusBar()::setStatus );
-                    System.out.println( "Successful login." );
-                } catch ( Exception ex ){
+                    SwingUtilities.invokeLater( () -> mainWindow.getStatusBar().setStatus( "Processing successful login..." ) );
+                } catch ( Exception ex ) {
                     String message = credentials.getUsername().length() > 0 ?
                             "Attempted login with username " + credentials.getUsername() + " failed" :
                             "Attempted login failed";
@@ -68,9 +69,13 @@ public class Controller {
                     JOptionPane.showMessageDialog( mainWindow.getFrame(), message, "Login failure", JOptionPane.ERROR_MESSAGE );
                     mainWindow.getStatusBar().setStatus( "Login: Login failure (" + ex.getMessage() + ")" );
                 } finally {
-                    mainWindow.getFrame().revalidate();
-                    mainWindow.getFrame().repaint();
-                    mainWindow.getStatusBar().setProgressBarIndeterminate( false );
+                    SwingUtilities.invokeLater( () -> {
+                        mainWindow.getStatusBar().refreshStatistics();
+                        mainWindow.getFrame().revalidate();
+                        mainWindow.getFrame().repaint();
+                        mainWindow.getStatusBar().setStatus( "" );
+                        mainWindow.getStatusBar().setProgressBarIndeterminate( false );
+                    } );
                 }
             } ) ).start();
         }
@@ -92,14 +97,16 @@ public class Controller {
             mainWindow.getStatusBar().setStatus( "Loading article..." );
         } );
         Article nextArticle = accountModel.getBot().getArticle( listModel.firstElement() );
-        mainWindow.getEditorPanel().setText( nextArticle.getText() );
-        mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
-        mainWindow.getMakeListPanel().shiftUp();
-        editorModel.setCurrentArticle( nextArticle );
+        String text = nextArticle.getText();
         SwingUtilities.invokeLater( () -> {
+            mainWindow.getEditorPanel().setText( text );
+            mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
+            mainWindow.getMakeListPanel().shiftUp();
+            mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
             mainWindow.getStatusBar().setProgressBarIndeterminate( false );
             mainWindow.getStatusBar().setStatus( "" );
         } );
+        editorModel.setCurrentArticle( nextArticle );
     }
 
     public void handleSave() {
@@ -117,14 +124,63 @@ public class Controller {
                                        Configurables.EDIT_SUMMARY_SUFFIX );
         currentArticle.setText( mainWindow.getEditorPanel().getText() );
         currentArticle.save();
-        mainWindow.getEditorPanel().setText( "" );
-        SwingUtilities.invokeLater( () -> {
+        statisticsModel.incrementEdits();
+
+        if ( listModel.isEmpty() ) {
+            mainWindow.getEditorPanel().setText( "" );
+            mainWindow.setTitle( "" );
+            mainWindow.getStatusBar().setStatus( "No articles left in the list." );
+        } else {
+            SwingUtilities.invokeLater( () -> {
+                mainWindow.getStatusBar().setProgressBarIndeterminate( true );
+                mainWindow.getStatusBar().setStatus( "Loading article..." );
+            } );
+            Article nextArticle = accountModel.getBot().getArticle( listModel.firstElement() );
+            mainWindow.getEditorPanel().setText( nextArticle.getText() );
+            mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
+            mainWindow.getMakeListPanel().shiftUp();
+            editorModel.setCurrentArticle( nextArticle );
+            mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
             mainWindow.getStatusBar().setProgressBarIndeterminate( false );
             mainWindow.getStatusBar().setStatus( "" );
-        } );
+        }
+        SwingUtilities.invokeLater( mainWindow.getStatusBar()::refreshStatistics );
+    }
+
+    public void handleSkip() {
+        if ( !accountModel.isLoggedIn() ) {
+            JOptionPane.showMessageDialog( mainWindow.getFrame(), "Log in first!" );
+            return;
+        }
+
+        statisticsModel.incrementSkipped();
+        if ( listModel.isEmpty() ) {
+            mainWindow.getEditorPanel().setText( "" );
+            mainWindow.setTitle( "" );
+            mainWindow.getStatusBar().setStatus( "No articles left in the list." );
+        } else {
+            SwingUtilities.invokeLater( () -> {
+                mainWindow.getStatusBar().setProgressBarIndeterminate( true );
+                mainWindow.getStatusBar().setStatus( "Loading article..." );
+            } );
+            Article nextArticle = accountModel.getBot().getArticle( listModel.firstElement() );
+            mainWindow.getEditorPanel().setText( nextArticle.getText() );
+            mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
+            mainWindow.getMakeListPanel().shiftUp();
+            editorModel.setCurrentArticle( nextArticle );
+            SwingUtilities.invokeLater( () -> {
+                mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
+                mainWindow.getStatusBar().setStatus( "" );
+            } );
+        }
+        SwingUtilities.invokeLater( mainWindow.getStatusBar()::refreshStatistics );
     }
 
     public AccountModel getAccountModel() {
         return accountModel;
+    }
+
+    public StatisticsModel getStatisticsModel() {
+        return statisticsModel;
     }
 }

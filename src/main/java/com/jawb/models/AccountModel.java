@@ -30,7 +30,6 @@ public class AccountModel {
         bot = new MediaWikiBot( client );
         statusCallback.accept( "Logging in..." );
         bot.login( username, password );
-        statusCallback.accept( "Logged in!" );
         this.credentials = credentials;
     }
 

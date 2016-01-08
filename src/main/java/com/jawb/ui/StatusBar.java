@@ -22,18 +22,24 @@ public class StatusBar extends JPanel {
     private JLabel statistics;
     private LoginBadge badge;
 
-    public StatusBar( Controller controller ) {
-        super();
+    private Controller controller;
 
-        this.setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
+    public StatusBar( Controller controller ) {
+        super( new BorderLayout() );
+
+        this.controller = controller;
+
+        JPanel leftPanel = new JPanel();
         bar = new JProgressBar();
-        bar.setPreferredSize( new Dimension( 5, 15 ) );
-        this.add( bar );
+        bar.setPreferredSize( new Dimension( 100, 15 ) );
+        leftPanel.add( bar );
         status = new JLabel( DEFAULT_STATUS );
-        this.add( status );
-        this.add( Box.createHorizontalGlue() );
+        leftPanel.add( status );
+        this.add( leftPanel, BorderLayout.WEST );
+
+        JPanel rightPanel = new JPanel();
         statistics = new JLabel( getStatistics() );
-        this.add( statistics );
+        rightPanel.add( statistics );
         badge = new LoginBadge( controller );
         badge.addMouseListener( new MouseAdapter() {
             @Override
@@ -41,12 +47,26 @@ public class StatusBar extends JPanel {
                 controller.handleLogin();
             }
         } );
-        this.add( badge );
+        rightPanel.add( badge );
+        this.add( rightPanel, BorderLayout.EAST );
     }
 
     private String getStatistics() {
-        return "Pages/min: 0   Edits/min: 0   Edits: 0   Skipped:" +
-            " 0   New: 0   en.wikipedia";
+        if( controller.getAccountModel().isLoggedIn() ) {
+            return String.format( "Pages/min: ?  Edits/min: ?  Edits: %d  Skipped: %d, New: ?  %s",
+                    controller.getStatisticsModel().getEdits(),
+                    controller.getStatisticsModel().getSkipped(),
+                    controller.getAccountModel().getCredentials().getEntryPoint()
+                            .replace( "https://", "" )
+                            .replace( ".org/w/api.php", "" ) );
+        } else {
+            return "Pages/min: 0   Edits/min: 0   Edits: 0   Skipped:" +
+                    " 0   New: 0   en.wikipedia";
+        }
+    }
+
+    public void refreshStatistics() {
+        statistics.setText( getStatistics() );
     }
 
     public void setProgressBarIndeterminate( boolean value ) {

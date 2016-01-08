@@ -1,5 +1,7 @@
 package com.jawb.ui;
 
+import com.jawb.Controller;
+
 import java.awt.*;
 
 import javax.swing.*;
@@ -12,8 +14,13 @@ public class OptionsPanel extends JPanel {
     private JCheckBox lock;
     private JCheckBox minorEdit;
 
-    public OptionsPanel() {
+    Controller controller;
+
+    public OptionsPanel( Controller controller ) {
         super( new BorderLayout() );
+
+        this.controller = controller;
+
         JTabbedPane tabs = new JTabbedPane();
         JPanel skipOptions = new JPanel();
         skipOptions.add( new JLabel( "Skip options" ) );
@@ -39,7 +46,7 @@ public class OptionsPanel extends JPanel {
                                                    BoxLayout.Y_AXIS ) );
         JPanel rightSaveOptions1 = new JPanel( new GridLayout( 2, 1, 0, 10 ) );
         JButton startButton = new JButton( "Start" );
-        Listeners.add( startButton );
+        startButton.addActionListener( event -> new Thread( controller::handleStart ).start() );
         rightSaveOptions1.add( startButton );
         JButton stopButton = new JButton( "Stop" );
         rightSaveOptions1.add( stopButton );
@@ -70,14 +77,19 @@ public class OptionsPanel extends JPanel {
         rightSaveOptions.add( rightSaveOptions2 );
         rightSaveOptions.add( Box.createVerticalStrut( 10 ) );
         JPanel rightSaveOptions3 = new JPanel( new GridLayout( 2, 1, 0, 10 ) );
-        JButton saveButton = new JButton( "Save" );
-        rightSaveOptions3.add( saveButton );
         rightSaveOptions3.add( new JButton( "Skip" ) );
+        JButton saveButton = new JButton( "Save" );
+        saveButton.addActionListener( event -> new Thread( controller::handleSave ).start() );
+        rightSaveOptions3.add( saveButton );
         rightSaveOptions.add( rightSaveOptions3 );
         mainSaveOptions.add( rightSaveOptions );
         saveOptions.add( mainSaveOptions, BorderLayout.CENTER );
         tabs.add( "Start", saveOptions );
         tabs.setSelectedIndex( tabs.getTabCount() - 1 );
         this.add( tabs );
+    }
+
+    public String getDefaultEditSummary() {
+        return defaultEditSummary.getText();
     }
 }

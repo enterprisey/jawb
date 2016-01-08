@@ -5,6 +5,7 @@ import java.awt.image.*;
 
 import javax.swing.*;
 
+import com.jawb.Controller;
 import com.jawb.models.AccountModel;
 
 /**
@@ -16,8 +17,8 @@ public class LoginBadge extends JComponent {
 
     private AccountModel accountModel;
 
-    public LoginBadge( AccountModel model ) {
-        accountModel = model;
+    public LoginBadge( Controller controller ) {
+        accountModel = controller.getAccountModel();
     }
 
     public void paintComponent( Graphics g ) {

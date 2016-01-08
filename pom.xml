@@ -120,7 +120,7 @@
           </descriptorRefs>
           <archive>
             <manifest>
-              <mainClass>com.jawb.Main</mainClass>
+              <mainClass>com.jawb.Controller</mainClass>
             </manifest>
           </archive>
         </configuration>

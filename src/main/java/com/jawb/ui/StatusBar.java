@@ -6,10 +6,8 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.*;
 
+import com.jawb.Controller;
 import com.jawb.login.LoginBadge;
-import com.jawb.login.LoginCredentials;
-import com.jawb.login.LoginDialog;
-import com.jawb.models.*;
 import com.jawb.utils.*;
 
 /**
@@ -24,16 +22,8 @@ public class StatusBar extends JPanel {
     private JLabel statistics;
     private LoginBadge badge;
 
-    private LoginDialog dialog;
-
-    private MainWindow mainWindow;
-    private AccountModel accountModel;
-
-    public StatusBar( MainWindow mainWindow, AccountModel accountModel ) {
+    public StatusBar( Controller controller ) {
         super();
-
-        this.mainWindow = mainWindow;
-        this.accountModel = accountModel;
 
         this.setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
         bar = new JProgressBar();
@@ -44,11 +34,14 @@ public class StatusBar extends JPanel {
         this.add( Box.createHorizontalGlue() );
         statistics = new JLabel( getStatistics() );
         this.add( statistics );
-        badge = new LoginBadge( accountModel );
-        badge.addMouseListener( new LoginBadgeListener( status, bar ) );
+        badge = new LoginBadge( controller );
+        badge.addMouseListener( new MouseAdapter() {
+            @Override
+            public void mouseClicked( MouseEvent e ) {
+                controller.handleLogin();
+            }
+        } );
         this.add( badge );
-
-        dialog = new LoginDialog( mainWindow.getFrame() );
     }
 
     private String getStatistics() {
@@ -62,53 +55,5 @@ public class StatusBar extends JPanel {
 
     public void setStatus( String newStatus ) {
         status.setText( newStatus.isEmpty() ? DEFAULT_STATUS : newStatus );
-    }
-
-    public class LoginBadgeListener extends MouseAdapter {
-        private JLabel statusLabel;
-        private JProgressBar progressBar;
-
-        public LoginBadgeListener( JLabel statusLabel, JProgressBar progressBar ) {
-            this.statusLabel = statusLabel;
-            this.progressBar = progressBar;
-        }
-
-        public void mouseClicked( MouseEvent event ) {
-            if( accountModel.isLoggedIn() ) {
-                JOptionPane.showMessageDialog( mainWindow.getFrame(),
-                        "Logged in to " + accountModel.getCredentials().getEntryPoint() +
-                        " as " + accountModel.getUsername() + ".",
-                        "Login status", JOptionPane.INFORMATION_MESSAGE );
-            } else {
-                dialog.show();
-                LoginCredentials credentials = dialog.getCredentials();
-                if( credentials.getUsername().isEmpty() || credentials.getPassword().isEmpty() ) {
-                    JOptionPane.showMessageDialog( mainWindow.getFrame(),
-                            "Please enter a username and password.", "Login failure", JOptionPane.ERROR_MESSAGE );
-                    return;
-                }
-                ( new Thread( new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            progressBar.setIndeterminate( true );
-                            mainWindow.getFrame().repaint();
-                            accountModel.login( credentials, s -> statusLabel.setText( "Login: " + s ) );
-                            System.out.println( "Successful login." );
-                            mainWindow.getFrame().revalidate();
-                            mainWindow.getFrame().repaint();
-                            progressBar.setIndeterminate( false );
-                        } catch ( Exception ex ){
-                            String message = credentials.getUsername().length() > 0 ?
-                                    "Attempted login with username " + credentials.getUsername() + " failed" :
-                                    "Attempted login failed";
-                            message += "\n" + ex.getMessage();
-                            ex.printStackTrace();
-                            JOptionPane.showMessageDialog( mainWindow.getFrame(), message, "Login failure", JOptionPane.ERROR_MESSAGE );
-                        }
-                    }
-                } ) ).start();
-            }
-        }
     }
 }

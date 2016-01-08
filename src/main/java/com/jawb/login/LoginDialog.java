@@ -55,6 +55,7 @@ public class LoginDialog {
         c.weightx = 1;
         c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;
+        c.insets = new Insets( 2, 2, 2, 2 );
         c.gridx = 0;
         c.gridy = 0;
         panel.add( siteLabel, c );

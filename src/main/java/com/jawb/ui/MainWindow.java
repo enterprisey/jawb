@@ -5,7 +5,7 @@ import java.awt.event.*;
 
 import javax.swing.*;
 
-import com.jawb.models.*;
+import com.jawb.Controller;
 import com.jawb.utils.*;
 
 /**
@@ -13,23 +13,22 @@ import com.jawb.utils.*;
  */
 public class MainWindow {
     private JFrame frame;
-    private JEditorPane editPane;
     private JSplitPane mainSplitPane;
-    private JSplitPane bottomSplitPane;
+    private JSplitPane southSplitPane;
 
     private MakeListPanel makeListPanel;
     private OptionsPanel optionsPanel;
     private EditorPanel editorPanel;
     private StatusBar statusBar;
 
-    private AccountModel accountModel;
+    private Controller controller;
     private DefaultListModel<String> listModel;
 
     private static final double MAIN_SPLIT = 0.5;
     private static final double BOTTOM_SPLIT = 0.455;
 
-    public MainWindow( AccountModel accountModel, DefaultListModel<String> listModel ) {
-        this.accountModel = accountModel;
+    public MainWindow( Controller controller, DefaultListModel<String> listModel ) {
+        this.controller = controller;
         this.listModel = listModel;
     }
 
@@ -42,28 +41,28 @@ public class MainWindow {
         JPanel bottomLeftPanel = new JPanel( new BorderLayout() );
         setMakeListPanel( new MakeListPanel( listModel ) );
         bottomLeftPanel.add( getMakeListPanel(), BorderLayout.WEST );
-        setOptionsPanel( new OptionsPanel() );
+        setOptionsPanel( new OptionsPanel( controller ) );
         bottomLeftPanel.add( getOptionsPanel(), BorderLayout.CENTER );
         setEditorPanel( new EditorPanel() );
-        bottomSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
+        southSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                           bottomLeftPanel,
-                getEditorPanel() );
+                                          getEditorPanel() );
         mainSplitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT,
                                         getDiffPanel(),
-                                        bottomSplitPane );
+                                        southSplitPane );
         mainPanel.add( mainSplitPane, BorderLayout.CENTER );
-        setStatusBar( new StatusBar( this, accountModel ) );
+        setStatusBar( new StatusBar( controller ) );
         mainPanel.add( getStatusBar(), BorderLayout.SOUTH );
         frame.add( mainPanel );
         frame.addComponentListener( new ComponentAdapter() {
                 @Override
                 public void componentResized( ComponentEvent e ) {
                     mainSplitPane.setDividerLocation( MAIN_SPLIT );
-                    bottomSplitPane.setDividerLocation( BOTTOM_SPLIT );
+                    southSplitPane.setDividerLocation( BOTTOM_SPLIT );
                 }
             } );
         frame.setBounds( 200, 25, 1133, 600 );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setDefaultCloseOperation( WindowConstants.EXIT_ON_CLOSE );
     }
 
     private JPanel getDiffPanel() {
@@ -79,7 +78,7 @@ public class MainWindow {
         frame.setVisible( visible );
         if( visible ) {
             mainSplitPane.setDividerLocation( MAIN_SPLIT );
-            bottomSplitPane.setDividerLocation( BOTTOM_SPLIT );
+            southSplitPane.setDividerLocation( BOTTOM_SPLIT );
         }
     }
 
@@ -87,7 +86,7 @@ public class MainWindow {
         return frame;
     }
 
-    MakeListPanel getMakeListPanel() {
+    public MakeListPanel getMakeListPanel() {
         return makeListPanel;
     }
 
@@ -95,7 +94,7 @@ public class MainWindow {
         this.makeListPanel = makeListPanel;
     }
 
-    OptionsPanel getOptionsPanel() {
+    public OptionsPanel getOptionsPanel() {
         return optionsPanel;
     }
 
@@ -103,7 +102,7 @@ public class MainWindow {
         this.optionsPanel = optionsPanel;
     }
 
-    EditorPanel getEditorPanel() {
+    public EditorPanel getEditorPanel() {
         return editorPanel;
     }
 
@@ -111,7 +110,7 @@ public class MainWindow {
         this.editorPanel = editorPanel;
     }
 
-    StatusBar getStatusBar() {
+    public StatusBar getStatusBar() {
         return statusBar;
     }
 

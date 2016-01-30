@@ -48,10 +48,8 @@ public class LoginDialog {
         JLabel usernameLabel = new JLabel( "Username" );
         JLabel passwordLabel = new JLabel( "Password" );
 
-        JPanel panel = new JPanel();
-        GridBagLayout layout = new GridBagLayout();
+        JPanel panel = new JPanel( new GridBagLayout() );
         GridBagConstraints c = new GridBagConstraints();
-        panel.setLayout( layout );
         c.weightx = 1;
         c.weighty = 1;
         c.fill = GridBagConstraints.BOTH;

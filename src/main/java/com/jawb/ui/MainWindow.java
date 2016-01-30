@@ -25,7 +25,7 @@ public class MainWindow {
     private DefaultListModel<String> listModel;
 
     private static final double MAIN_SPLIT = 0.5;
-    private static final double BOTTOM_SPLIT = 0.455;
+    private static final double BOTTOM_SPLIT = 0.4;
 
     public static final String DEFAULT_TITLE = "JAutoWikiBrowser " +
             PropertiesManager.getInstance().getProperty( "application.version" );
@@ -40,10 +40,10 @@ public class MainWindow {
         JPanel mainPanel = new JPanel( new BorderLayout() );
         mainPanel.setBorder( BorderFactory.createEmptyBorder( 2, 2, 2, 2 ) );
         JPanel bottomLeftPanel = new JPanel( new BorderLayout() );
-        setMakeListPanel( new MakeListPanel( listModel ) );
-        bottomLeftPanel.add( getMakeListPanel(), BorderLayout.WEST );
+        setMakeListPanel( new MakeListPanel( controller, listModel ) );
+        bottomLeftPanel.add( getMakeListPanel(), BorderLayout.CENTER );
         setOptionsPanel( new OptionsPanel( controller ) );
-        bottomLeftPanel.add( getOptionsPanel(), BorderLayout.CENTER );
+        bottomLeftPanel.add( getOptionsPanel(), BorderLayout.EAST );
         setEditorPanel( new EditorPanel() );
         southSplitPane = new JSplitPane( JSplitPane.HORIZONTAL_SPLIT,
                                           bottomLeftPanel,

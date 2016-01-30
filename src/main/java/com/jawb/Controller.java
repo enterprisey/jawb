@@ -1,6 +1,7 @@
 package com.jawb;
 
 import javax.swing.*;
+import javax.swing.plaf.metal.MetalLookAndFeel;
 
 import com.jawb.login.LoginCredentials;
 import com.jawb.login.LoginDialog;
@@ -31,6 +32,8 @@ public class Controller {
         editorModel = new EditorModel();
         statisticsModel = new StatisticsModel();
 
+        setMetalBold();
+
         mainWindow = new MainWindow( this, listModel );
         loginDialog = new LoginDialog( mainWindow.getFrame() );
         mainWindow.setVisible( true );
@@ -40,7 +43,8 @@ public class Controller {
         if( accountModel.isLoggedIn() ) {
             JOptionPane.showMessageDialog( mainWindow.getFrame(),
                     "Logged in to " + accountModel.getCredentials().getEntryPoint() +
-                            " as " + accountModel.getUsername() + ".",
+                            " as " + accountModel.getUsername() +
+                            ". (In order to log out, you need to restart the program.",
                     "Login status", JOptionPane.INFORMATION_MESSAGE );
         } else {
             loginDialog.show();
@@ -87,26 +91,7 @@ public class Controller {
             return;
         }
 
-        if ( listModel.isEmpty() ) {
-            JOptionPane.showMessageDialog( mainWindow.getFrame(), "Add pages to the list first!" );
-            return;
-        }
-
-        SwingUtilities.invokeLater( () -> {
-            mainWindow.getStatusBar().setProgressBarIndeterminate( true );
-            mainWindow.getStatusBar().setStatus( "Loading article..." );
-        } );
-        Article nextArticle = accountModel.getBot().getArticle( listModel.firstElement() );
-        String text = nextArticle.getText();
-        SwingUtilities.invokeLater( () -> {
-            mainWindow.getEditorPanel().setText( text );
-            mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
-            mainWindow.getMakeListPanel().shiftUp();
-            mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
-            mainWindow.getStatusBar().setProgressBarIndeterminate( false );
-            mainWindow.getStatusBar().setStatus( "" );
-        } );
-        editorModel.setCurrentArticle( nextArticle );
+        nextArticle();
     }
 
     public void handleSave() {
@@ -125,26 +110,7 @@ public class Controller {
         currentArticle.setText( mainWindow.getEditorPanel().getText() );
         currentArticle.save();
         statisticsModel.incrementEdits();
-
-        if ( listModel.isEmpty() ) {
-            mainWindow.getEditorPanel().setText( "" );
-            mainWindow.setTitle( "" );
-            mainWindow.getStatusBar().setStatus( "No articles left in the list." );
-        } else {
-            SwingUtilities.invokeLater( () -> {
-                mainWindow.getStatusBar().setProgressBarIndeterminate( true );
-                mainWindow.getStatusBar().setStatus( "Loading article..." );
-            } );
-            Article nextArticle = accountModel.getBot().getArticle( listModel.firstElement() );
-            mainWindow.getEditorPanel().setText( nextArticle.getText() );
-            mainWindow.getEditorPanel().setEditSummary( mainWindow.getOptionsPanel().getDefaultEditSummary() );
-            mainWindow.getMakeListPanel().shiftUp();
-            editorModel.setCurrentArticle( nextArticle );
-            mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
-            mainWindow.getStatusBar().setProgressBarIndeterminate( false );
-            mainWindow.getStatusBar().setStatus( "" );
-        }
-        SwingUtilities.invokeLater( mainWindow.getStatusBar()::refreshStatistics );
+        nextArticle();
     }
 
     public void handleSkip() {
@@ -154,6 +120,10 @@ public class Controller {
         }
 
         statisticsModel.incrementSkipped();
+        nextArticle();
+    }
+
+    private void nextArticle() {
         if ( listModel.isEmpty() ) {
             mainWindow.getEditorPanel().setText( "" );
             mainWindow.setTitle( "" );
@@ -182,5 +152,22 @@ public class Controller {
 
     public StatisticsModel getStatisticsModel() {
         return statisticsModel;
+    }
+
+
+    /**
+     * Since the Metal theme, by default, makes everything bold, this turns that off.
+     * @link https://docs.oracle.com/javase/7/docs/api/javax/swing/plaf/metal/DefaultMetalTheme.html
+     */
+    private void setMetalBold() {
+        // turn off bold fonts
+        UIManager.put( "swing.boldMetal", Boolean.FALSE );
+
+        // re-install the Metal Look and Feel
+        try {
+            UIManager.setLookAndFeel( new MetalLookAndFeel() );
+        } catch ( UnsupportedLookAndFeelException e ) {
+            e.printStackTrace();
+        }
     }
 }

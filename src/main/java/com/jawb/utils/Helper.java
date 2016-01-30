@@ -1,6 +1,7 @@
 package com.jawb.utils;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import java.awt.*;
 
 public abstract class Helper {
@@ -23,5 +24,28 @@ public abstract class Helper {
 
     public static Rectangle getCenteredBounds( int width, int height ) {
         return getCenteredBounds( new Dimension( width, height ) );
+    }
+
+    /**
+     * Makes a titled border using a black line border.
+     * @param title The title that will appear in the border.
+     * @return A titled border with the given title.
+     */
+    public static Border getLineTitledBorder( String title ) {
+        Border lineBorder = BorderFactory.createLineBorder( Color.BLACK );
+        return BorderFactory.createTitledBorder( lineBorder, title );
+    }
+
+    /**
+     * Wraps a JComponent in a BorderLayout so that it's squeezed to the left.
+     * @param component The component to wrap.
+     * @return A component that wraps the given component.
+     */
+    public static JPanel leftWrapper( JComponent component ) {
+        JPanel wrapper = new JPanel( new BorderLayout() );
+        wrapper.setBackground( new Color( 0, 0, 0, 0.25f ) );
+        wrapper.add( component, BorderLayout.WEST );
+        wrapper.setMaximumSize( component.getPreferredSize() );
+        return wrapper;
     }
 }

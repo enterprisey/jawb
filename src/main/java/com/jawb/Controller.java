@@ -108,6 +108,7 @@ public class Controller {
         currentArticle.setEditSummary( mainWindow.getEditorPanel().getEditSummary() +
                                        Configurables.EDIT_SUMMARY_SUFFIX );
         currentArticle.setText( mainWindow.getEditorPanel().getText() );
+        currentArticle.setMinorEdit( mainWindow.getOptionsPanel().isMinorEdit() );
         currentArticle.save();
         statisticsModel.incrementEdits();
         nextArticle();
@@ -128,6 +129,7 @@ public class Controller {
             mainWindow.getEditorPanel().setText( "" );
             mainWindow.setTitle( "" );
             mainWindow.getStatusBar().setStatus( "No articles left in the list." );
+            mainWindow.getStatusBar().setProgressBarIndeterminate( false );
         } else {
             SwingUtilities.invokeLater( () -> {
                 mainWindow.getStatusBar().setProgressBarIndeterminate( true );
@@ -141,6 +143,7 @@ public class Controller {
             SwingUtilities.invokeLater( () -> {
                 mainWindow.setTitle( MainWindow.DEFAULT_TITLE + " - " + nextArticle.getTitle() );
                 mainWindow.getStatusBar().setStatus( "" );
+                mainWindow.getStatusBar().setProgressBarIndeterminate( false );
             } );
         }
         SwingUtilities.invokeLater( mainWindow.getStatusBar()::refreshStatistics );

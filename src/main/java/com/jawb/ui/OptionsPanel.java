@@ -55,6 +55,7 @@ public class OptionsPanel extends JPanel {
         startButton.addActionListener( event -> new Thread( controller::handleStart ).start() );
         rightSaveOptions1.add( startButton );
         JButton stopButton = new JButton( "Stop" );
+        Helper.makeNiy( stopButton );
         rightSaveOptions1.add( stopButton );
         rightSaveOptions.add( rightSaveOptions1 );
         rightSaveOptions.add( Box.createVerticalStrut( 10 ) );
@@ -164,5 +165,9 @@ public class OptionsPanel extends JPanel {
 
     public String getDefaultEditSummary() {
         return defaultEditSummary.getText();
+    }
+
+    public boolean isMinorEdit() {
+        return minorEdit.isSelected();
     }
 }

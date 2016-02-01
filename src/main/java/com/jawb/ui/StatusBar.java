@@ -8,6 +8,7 @@ import javax.swing.*;
 
 import com.jawb.Controller;
 import com.jawb.login.LoginBadge;
+import com.jawb.models.StatisticsModel;
 import com.jawb.utils.*;
 
 /**
@@ -53,9 +54,13 @@ public class StatusBar extends JPanel {
 
     private String getStatistics() {
         if( controller.getAccountModel().isLoggedIn() ) {
-            return String.format( "Pages/min: ?  Edits/min: ?  Edits: %d  Skipped: %d, New: ?  %s",
-                    controller.getStatisticsModel().getEdits(),
-                    controller.getStatisticsModel().getSkipped(),
+            StatisticsModel s = controller.getStatisticsModel();
+            return String.format( "Pages/min: %d  Edits/min: %d  Edits: %d  Skipped: %d, New: %d  %s",
+                    s.getRecentActions(),
+                    s.getRecentEdits(),
+                    s.getEdits(),
+                    s.getSkipped(),
+                    s.getNew(),
                     controller.getAccountModel().getCredentials().getEntryPoint()
                             .replace( "https://", "" )
                             .replace( ".org/w/api.php", "" ) );

@@ -48,4 +48,12 @@ public abstract class Helper {
         wrapper.setMaximumSize( component.getPreferredSize() );
         return wrapper;
     }
+
+    public static void makeNiy( JComponent component ) {
+        component.setEnabled( false );
+        if( component instanceof AbstractButton ) {
+            AbstractButton button = ( AbstractButton ) component;
+            button.setText( button.getText() + " (NIY)" );
+        }
+    }
 }

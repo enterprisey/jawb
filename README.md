@@ -3,6 +3,6 @@ A Java port of AutoWikiBrowser.
 
 I made this because I was tired of messing with Wine configuration to get AWB to run on Linux.
 
-## Building
+## Building and running
     mvn package
-That's all you need. By the way, you'll want to run the -with-dependencies JAR file that appears in the target folder, not the other one.
+After the build is done, you'll want to go to the target folder and run the JAR file with `-with-dependencies` in its name, not the other JAR file.
